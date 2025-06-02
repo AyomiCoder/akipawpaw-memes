@@ -96,9 +96,22 @@ export async function POST(request: Request) {
       updatedAt: new Date(),
     }
 
-    console.log("Saving to MongoDB:", meme)
-    const result = await db.collection("memes").insertOne(meme)
-    console.log("MongoDB insert result:", result)
+    console.log("Attempting to save to MongoDB:", meme)
+    try {
+      const result = await db.collection("memes").insertOne(meme)
+      console.log("MongoDB insert result:", result)
+      
+      // Verify the insert by reading it back
+      const savedMeme = await db.collection("memes").findOne({ id: meme.id })
+      console.log("Verification - Found saved meme:", savedMeme ? "Yes" : "No")
+      
+      if (!savedMeme) {
+        throw new Error("Failed to verify meme was saved")
+      }
+    } catch (error: any) {
+      console.error("Database error:", error)
+      throw new Error(`Failed to save to database: ${error.message}`)
+    }
 
     return NextResponse.json({
       success: true,

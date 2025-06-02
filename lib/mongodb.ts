@@ -8,10 +8,15 @@ if (!process.env.MONGODB_URI) {
   throw new Error('Invalid/Missing environment variable: "MONGODB_URI"')
 }
 
-// Ensure the connection string includes the database name
-const uri = process.env.MONGODB_URI.includes("/akipawpaw") 
-  ? process.env.MONGODB_URI 
-  : process.env.MONGODB_URI.replace(/\?/, "/akipawpaw?")
+// Validate MongoDB URI format
+const uri = process.env.MONGODB_URI
+if (!uri.startsWith('mongodb://') && !uri.startsWith('mongodb+srv://')) {
+  throw new Error('Invalid MongoDB URI format. Must start with mongodb:// or mongodb+srv://')
+}
+
+if (!uri.includes('mongodb.net')) {
+  throw new Error('Invalid MongoDB URI. Must be a MongoDB Atlas connection string')
+}
 
 // Log the connection string (without credentials)
 const sanitizedUri = uri.replace(/mongodb(\+srv)?:\/\/([^:]+):([^@]+)@/, 'mongodb$1://***:***@')
