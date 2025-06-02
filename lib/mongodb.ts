@@ -25,18 +25,16 @@ console.log("Connecting to MongoDB:", sanitizedUri)
 const options = {
   ssl: true,
   tls: true,
-  tlsAllowInvalidCertificates: true,
-  tlsAllowInvalidHostnames: true,
-  retryWrites: true,
-  writeConcern: new WriteConcern("majority"),
   maxPoolSize: 10,
   minPoolSize: 5,
   maxIdleTimeMS: 60000,
   connectTimeoutMS: 10000,
-  socketTimeoutMS: 45000
+  socketTimeoutMS: 45000,
+  family: 4,
+  writeConcern: new WriteConcern("majority", 2500),
 }
 
-let client
+let client: MongoClient
 let clientPromise: Promise<MongoClient>
 
 if (process.env.NODE_ENV === "development") {
@@ -57,6 +55,10 @@ if (process.env.NODE_ENV === "development") {
   clientPromise = client.connect()
 }
 
-// Export a module-scoped MongoClient promise. By doing this in a
-// separate module, the client can be shared across functions.
+export async function connectToDatabase() {
+  const client = await clientPromise
+  const db = client.db("akipawpaw")
+  return { client, db }
+}
+
 export default clientPromise 

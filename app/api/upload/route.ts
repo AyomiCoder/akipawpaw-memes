@@ -1,126 +1,86 @@
-import { NextResponse } from "next/server"
-import { v4 as uuidv4 } from "uuid"
-import clientPromise from "@/lib/mongodb"
-import cloudinary from "@/lib/cloudinary"
+import { NextRequest, NextResponse } from "next/server"
+import { v2 as cloudinary } from "cloudinary"
+import { rateLimit } from "@/lib/rate-limit"
+import { connectToDatabase } from "@/lib/mongodb"
+import { ObjectId } from "mongodb"
 
-export async function POST(request: Request) {
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+})
+
+export async function POST(req: NextRequest) {
   try {
-    const formData = await request.formData()
-    const file = formData.get("file") as File
-    const uploaderName = formData.get("uploaderName") as string
-    const category = formData.get("category") as string
-    const hashtags = formData.get("hashtags") as string
-    const socialLink = formData.get("socialLink") as string
-
-    if (!file) {
+    // Apply rate limiting
+    const rateLimitResult = rateLimit(req)
+    if (!rateLimitResult.success) {
       return NextResponse.json(
-        { error: "File is required" },
-        { status: 400 }
-      )
-    }
-    if (!uploaderName) {
-      return NextResponse.json(
-        { error: "Uploader name is required" },
-        { status: 400 }
-      )
-    }
-    if (!category) {
-      return NextResponse.json(
-        { error: "Category is required" },
-        { status: 400 }
-      )
-    }
-
-    // Validate file size (10MB limit)
-    if (file.size > 10 * 1024 * 1024) {
-      return NextResponse.json(
-        { error: "File size exceeds 10MB limit" },
-        { status: 400 }
-      )
-    }
-
-    // Validate file type
-    const validTypes = ["image/gif", "image/jpeg", "image/png", "video/mp4"]
-    if (!validTypes.includes(file.type)) {
-      return NextResponse.json(
-        { error: "Invalid file type. Only GIF, JPG, PNG, and MP4 files are allowed" },
-        { status: 400 }
-      )
-    }
-
-    // Convert file to base64
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-    const base64File = `data:${file.type};base64,${buffer.toString("base64")}`
-
-    console.log("Uploading to Cloudinary...")
-    // Upload to Cloudinary
-    const uploadResponse = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload(
-        base64File,
-        {
-          resource_type: "auto",
-          folder: "akipawpaw",
-          public_id: uuidv4(),
-        },
-        (error, result) => {
-          if (error) reject(error)
-          else resolve(result)
+        { error: rateLimitResult.message },
+        { 
+          status: 429,
+          headers: {
+            'Retry-After': rateLimitResult.retryAfter?.toString() || '60'
+          }
         }
       )
+    }
+
+    const formData = await req.formData()
+    const file = formData.get("file") as File
+    const uploaderName = formData.get("uploaderName") as string
+    const socialLink = formData.get("socialLink") as string
+    const category = formData.get("category") as string
+    const hashtags = formData.get("hashtags") as string
+
+    if (!file) {
+      return NextResponse.json({ error: "No file provided" }, { status: 400 })
+    }
+
+    // Convert file to buffer for Cloudinary
+    const bytes = await file.arrayBuffer()
+    const buffer = Buffer.from(bytes)
+
+    // Upload to Cloudinary
+    const uploadResult = await new Promise((resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream(
+          {
+            resource_type: "auto",
+            folder: "akipawpaw",
+          },
+          (error, result) => {
+            if (error) reject(error)
+            else resolve(result)
+          }
+        )
+        .end(buffer)
     })
-    console.log("Cloudinary upload response:", uploadResponse)
 
-    console.log("Connecting to MongoDB...")
-    // Connect to MongoDB
-    const client = await clientPromise
-    const db = client.db("akipawpaw")
-
-    // Process hashtags
-    const categoryHashtag = category.toLowerCase().replace(/\s+/g, '')
-    const additionalHashtags = hashtags ? hashtags.split(",").map((tag) => tag.trim()).filter(Boolean) : []
-    const allHashtags = [...new Set([categoryHashtag, ...additionalHashtags])]
-
-    // Save to database
-    const meme = {
-      id: uuidv4(),
-      fileName: (uploadResponse as any).public_id,
-      fileUrl: (uploadResponse as any).secure_url,
+    // Save to MongoDB
+    const { db } = await connectToDatabase()
+    const result = await db.collection("memes").insertOne({
+      _id: new ObjectId(),
+      fileUrl: (uploadResult as any).secure_url,
       uploaderName,
-      category,
-      hashtags: allHashtags,
       socialLink,
-      likes: 0,
-      views: 0,
+      category,
+      hashtags: hashtags.split(",").map((tag) => tag.trim()),
       createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-
-    console.log("Attempting to save to MongoDB:", meme)
-    try {
-      const result = await db.collection("memes").insertOne(meme)
-      console.log("MongoDB insert result:", result)
-      
-      // Verify the insert by reading it back
-      const savedMeme = await db.collection("memes").findOne({ id: meme.id })
-      console.log("Verification - Found saved meme:", savedMeme ? "Yes" : "No")
-      
-      if (!savedMeme) {
-        throw new Error("Failed to verify meme was saved")
-      }
-    } catch (error: any) {
-      console.error("Database error:", error)
-      throw new Error(`Failed to save to database: ${error.message}`)
-    }
+      views: 0,
+      likes: 0,
+    })
 
     return NextResponse.json({
       success: true,
-      meme,
+      memeId: result.insertedId,
+      remainingUploads: rateLimitResult.remaining
     })
-  } catch (error: any) {
+  } catch (error) {
     console.error("Upload error:", error)
     return NextResponse.json(
-      { error: error.message || "Failed to upload meme" },
+      { error: "Failed to upload meme" },
       { status: 500 }
     )
   }

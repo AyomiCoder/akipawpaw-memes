@@ -23,6 +23,7 @@ export default function UploadModal({ children }: UploadModalProps) {
   const [file, setFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState("")
+  const [remainingUploads, setRemainingUploads] = useState<number | null>(null)
 
   const predefinedCategories = [
     "Funny",
@@ -66,14 +67,19 @@ export default function UploadModal({ children }: UploadModalProps) {
         body: formData,
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        const data = await response.json()
+        if (response.status === 429) {
+          throw new Error(data.error || "Rate limit exceeded. Please try again later.")
+        }
         throw new Error(data.error || "Failed to upload meme")
       }
 
+      setRemainingUploads(data.remainingUploads)
       toast({
         title: "Success! 🎉",
-        description: "Your meme has been uploaded successfully",
+        description: `Your meme has been uploaded successfully. ${data.remainingUploads} uploads remaining.`,
       })
 
       // Dispatch custom event for successful upload
@@ -123,6 +129,18 @@ export default function UploadModal({ children }: UploadModalProps) {
               <span className="sr-only">Close</span>
             </Button>
           </DialogHeader>
+
+          {error && (
+            <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 mb-4 text-red-300 text-sm">
+              {error}
+            </div>
+          )}
+
+          {remainingUploads !== null && (
+            <div className="bg-purple-500/20 border border-purple-500/30 rounded-lg p-3 mb-4 text-purple-300 text-sm">
+              You have {remainingUploads} uploads remaining in the next hour.
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 mt-4">
             {/* Uploader Name */}
