@@ -23,7 +23,8 @@ export default function GifGrid({ searchQuery }: GifGridProps) {
       const res = await fetch("/api/memes")
       const data = await res.json()
       setGifs(data.memes || [])
-    } catch {
+    } catch (error) {
+      console.error("Error fetching memes:", error)
       setGifs([])
     } finally {
       setLoading(false)
@@ -37,6 +38,7 @@ export default function GifGrid({ searchQuery }: GifGridProps) {
   // Listen for custom event when a new meme is uploaded
   useEffect(() => {
     const handleNewMeme = () => {
+      console.log("New meme uploaded, refreshing grid...")
       fetchMemes()
     }
 

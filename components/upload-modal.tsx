@@ -18,10 +18,11 @@ export default function UploadModal({ children }: UploadModalProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [uploaderName, setUploaderName] = useState("")
   const [category, setCategory] = useState("")
-  const [hashtags, setHashtags] = useState<string[]>([])
+  const [hashtags, setHashtags] = useState("")
   const [socialLink, setSocialLink] = useState("")
   const [file, setFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [error, setError] = useState("")
 
   const predefinedCategories = [
     "Funny",
@@ -38,37 +39,37 @@ export default function UploadModal({ children }: UploadModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!file || !category) {
-      toast({
-        title: "Missing required fields",
-        description: "Please select a category and upload a file.",
-        variant: "destructive",
-      })
+    setError("")
+    setIsUploading(true)
+
+    if (!file) {
+      setError("Please select a file to upload")
+      setIsUploading(false)
       return
     }
 
-    try {
-      const formData = new FormData()
-      formData.append("file", file)
-      formData.append("uploaderName", uploaderName)
-      formData.append("socialLink", socialLink)
-      formData.append("category", category)
-      formData.append("hashtags", hashtags.join(","))
+    const formData = new FormData()
+    formData.append("file", file)
+    formData.append("uploaderName", uploaderName)
+    formData.append("socialLink", socialLink)
+    formData.append("category", category)
+    formData.append("hashtags", hashtags)
 
+    try {
       const response = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        toast({
-          title: "Upload failed",
-          description: errorData.error || "Something went wrong. Please try again.",
-          variant: "destructive",
-        })
-        throw new Error(errorData.error || "Upload failed")
+        const data = await response.json()
+        throw new Error(data.error || "Failed to upload meme")
       }
+
+      toast({
+        title: "Success! 🎉",
+        description: "Your meme has been uploaded successfully",
+      })
 
       // Dispatch custom event for successful upload
       window.dispatchEvent(new Event("newMemeUploaded"))
@@ -77,21 +78,23 @@ export default function UploadModal({ children }: UploadModalProps) {
       setUploaderName("")
       setSocialLink("")
       setCategory("")
-      setHashtags([])
+      setHashtags("")
       setFile(null)
       setIsOpen(false)
-    } catch (error: any) {
-      console.error("Upload error:", error)
-      // Error toast already shown above
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to upload meme")
+    } finally {
+      setIsUploading(false)
     }
   }
 
-  // Generate hashtags from category when it changes
-  const handleCategoryChange = (newCategory: string) => {
-    setCategory(newCategory)
-    // Generate hashtags from category name
-    const categoryHashtag = newCategory.toLowerCase().replace(/\s+/g, '')
-    setHashtags([categoryHashtag, "akipawpaw"])
+  const handleCategoryChange = (value: string) => {
+    setCategory(value)
+    // Generate hashtag from category but don't override existing hashtags
+    if (!hashtags) {
+      const categoryHashtag = value.toLowerCase().replace(/\s+/g, '')
+      setHashtags(categoryHashtag)
+    }
   }
 
   return (
@@ -180,12 +183,12 @@ export default function UploadModal({ children }: UploadModalProps) {
                 id="hashtags"
                 type="text"
                 placeholder="funny, aki, pawpaw, reaction"
-                value={hashtags.join(", ")}
-                onChange={(e) => setHashtags(e.target.value.split(", ").map(tag => tag.trim()))}
+                value={hashtags}
+                onChange={(e) => setHashtags(e.target.value)}
                 className="bg-white/10 border-purple-500/30 text-white placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500/50 transition-all duration-300"
               />
               <p className="text-xs text-gray-400">
-                Add additional hashtags separated by commas. We'll automatically add hashtags from your category.
+                The category hashtag will be automatically added. You can add more hashtags separated by commas.
               </p>
             </div>
 

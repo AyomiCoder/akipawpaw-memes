@@ -22,7 +22,7 @@ export default function GifModal({ gif, isOpen, onClose }: GifModalProps) {
   if (!isOpen) return null
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(`${window.location.origin}/gif/${gif.id}`)
+    navigator.clipboard.writeText(`${window.location.origin}/?gif=${gif.id}`)
     toast({
       title: "Link copied! 🔗",
       description: "Meme link has been copied to clipboard",
@@ -57,27 +57,27 @@ export default function GifModal({ gif, isOpen, onClose }: GifModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+      className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-2 animate-fade-in"
       onClick={handleBackdropClick}
     >
-      <div className="bg-gradient-to-br from-slate-900 to-purple-900 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-purple-500/30 animate-slide-up">
-        <div className="flex justify-between items-center p-6 border-b border-purple-500/30 bg-gradient-to-r from-purple-900/50 to-pink-900/50">
-          <div className="flex items-center gap-3">
-            <h3 className="font-bold text-xl text-white">Meme Details</h3>
+      <div className="bg-gradient-to-br from-slate-900 to-purple-900 rounded-lg max-w-lg w-full overflow-hidden flex flex-col shadow-2xl border border-purple-500/30 animate-slide-up">
+        <div className="flex justify-between items-center p-3 border-b border-purple-500/30 bg-gradient-to-r from-purple-900/50 to-pink-900/50">
+          <div className="flex items-center gap-2">
+            <h3 className="font-bold text-base text-white">Meme Details</h3>
           </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="rounded-full text-gray-400 hover:text-white hover:bg-white/10"
+            className="rounded-full text-gray-400 hover:text-white hover:bg-white/10 h-8 w-8"
           >
-            <X className="h-5 w-5" />
+            <X className="h-3 w-3" />
             <span className="sr-only">Close</span>
           </Button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6">
-          <div className="aspect-square w-full max-w-2xl mx-auto rounded-xl overflow-hidden mb-6">
+        <div className="flex-1 overflow-y-auto p-3">
+          <div className="aspect-square w-full max-w-md mx-auto rounded-md overflow-hidden mb-3">
             <img
               src={fileUrl}
               alt="Aki & Pawpaw meme"
@@ -85,11 +85,11 @@ export default function GifModal({ gif, isOpen, onClose }: GifModalProps) {
             />
           </div>
 
-          <div className="flex flex-wrap gap-2 mb-6">
+          <div className="flex flex-wrap gap-1.5 mb-3">
             {tags.map((tag, index) => (
               <span
                 key={index}
-                className="px-3 py-1 bg-purple-500/20 text-purple-300 text-sm rounded-full"
+                className="px-1.5 py-0.5 bg-purple-500/20 text-purple-300 text-[10px] rounded-full"
               >
                 #{tag}
               </span>
@@ -97,10 +97,10 @@ export default function GifModal({ gif, isOpen, onClose }: GifModalProps) {
           </div>
         </div>
 
-        <div className="border-t border-purple-500/30 p-6 bg-gradient-to-r from-slate-900/50 to-purple-900/50">
+        <div className="border-t border-purple-500/30 p-3 bg-gradient-to-r from-slate-900/50 to-purple-900/50">
           <div className="flex justify-between items-center">
-            <div className="text-sm text-gray-400">
-              Uploaded by{" "}
+            <div className="text-xs text-gray-400">
+              By{" "}
               <span
                 className="font-semibold text-cyan-300 hover:text-cyan-200 transition-colors cursor-pointer hover:underline"
                 onClick={handleUploaderClick}
@@ -109,23 +109,23 @@ export default function GifModal({ gif, isOpen, onClose }: GifModalProps) {
               </span>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-1.5">
               <Button
                 variant="outline"
                 size="sm"
-                className="flex gap-2 border-purple-500/30 text-gray-300 hover:text-white hover:bg-purple-500/20 transition-all duration-300 hover:scale-105"
+                className="flex gap-1.5 border-purple-500/30 text-gray-300 hover:text-white hover:bg-purple-500/20 transition-all duration-300 hover:scale-105 h-7 text-xs px-2"
                 onClick={handleCopyLink}
               >
-                <LinkIcon className="h-4 w-4" />
+                <LinkIcon className="h-3 w-3" />
                 Copy Link
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                className="flex gap-2 border-green-500/30 text-green-300 hover:text-white hover:bg-green-500/20 transition-all duration-300 hover:scale-105"
+                className="flex gap-1.5 border-green-500/30 text-green-300 hover:text-white hover:bg-green-500/20 transition-all duration-300 hover:scale-105 h-7 text-xs px-2"
                 onClick={handleDownload}
               >
-                <Download className="h-4 w-4" />
+                <Download className="h-3 w-3" />
                 Download
               </Button>
             </div>

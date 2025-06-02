@@ -6,14 +6,54 @@ import { Button } from "@/components/ui/button"
 import GifGrid from "@/components/gif-grid"
 import Footer from "@/components/footer"
 import UploadModal from "@/components/upload-modal"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSearchParams, useRouter } from "next/navigation"
+import GifModal from "@/components/gif-modal"
+import type { Meme } from "@/lib/types"
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("")
+  const [selectedGif, setSelectedGif] = useState<Meme | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const searchParams = useSearchParams()
+  const router = useRouter()
+
+  useEffect(() => {
+    const gifId = searchParams.get("gif")
+    if (gifId) {
+      fetch(`/api/meme/${gifId}`)
+        .then(res => {
+          if (!res.ok) {
+            throw new Error('Meme not found')
+          }
+          return res.json()
+        })
+        .then(data => {
+          if (data.meme) {
+            setSelectedGif(data.meme)
+            setIsModalOpen(true)
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching meme:', error)
+          // Redirect to home page if meme not found
+          router.push('/')
+        })
+    }
+  }, [searchParams, router])
 
   const handleSearch = () => {
     // Trigger search functionality
     console.log("Searching for:", searchQuery)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setSelectedGif(null)
+    // Update URL without the gif parameter
+    const url = new URL(window.location.href)
+    url.searchParams.delete('gif')
+    router.push(url.pathname + url.search)
   }
 
   return (
@@ -54,6 +94,11 @@ export default function Home() {
 
         {/* GIF Grid with integrated CategoryFilter */}
         <GifGrid searchQuery={searchQuery} />
+
+        {/* Modal */}
+        {isModalOpen && selectedGif && (
+          <GifModal gif={selectedGif} isOpen={isModalOpen} onClose={handleCloseModal} />
+        )}
       </main>
 
       <Footer />

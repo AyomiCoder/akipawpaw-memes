@@ -76,7 +76,7 @@ export async function POST(request: Request) {
     // Process hashtags
     const categoryHashtag = category.toLowerCase().replace(/\s+/g, '')
     const additionalHashtags = hashtags ? hashtags.split(",").map((tag) => tag.trim()).filter(Boolean) : []
-    const allHashtags = [...new Set([categoryHashtag, "akipawpaw", ...additionalHashtags])]
+    const allHashtags = [...new Set([categoryHashtag, ...additionalHashtags])]
 
     // Save to database
     const meme = {
