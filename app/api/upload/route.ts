@@ -53,6 +53,7 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(bytes)
     const base64File = `data:${file.type};base64,${buffer.toString("base64")}`
 
+    console.log("Uploading to Cloudinary...")
     // Upload to Cloudinary
     const uploadResponse = await new Promise((resolve, reject) => {
       cloudinary.uploader.upload(
@@ -68,7 +69,9 @@ export async function POST(request: Request) {
         }
       )
     })
+    console.log("Cloudinary upload response:", uploadResponse)
 
+    console.log("Connecting to MongoDB...")
     // Connect to MongoDB
     const client = await clientPromise
     const db = client.db("akipawpaw")
@@ -93,7 +96,9 @@ export async function POST(request: Request) {
       updatedAt: new Date(),
     }
 
-    await db.collection("memes").insertOne(meme)
+    console.log("Saving to MongoDB:", meme)
+    const result = await db.collection("memes").insertOne(meme)
+    console.log("MongoDB insert result:", result)
 
     return NextResponse.json({
       success: true,

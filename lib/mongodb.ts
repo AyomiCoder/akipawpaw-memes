@@ -1,17 +1,34 @@
 import { MongoClient, WriteConcern } from "mongodb"
+import dotenv from 'dotenv'
+
+// Load environment variables
+dotenv.config()
 
 if (!process.env.MONGODB_URI) {
   throw new Error('Invalid/Missing environment variable: "MONGODB_URI"')
 }
 
-const uri = process.env.MONGODB_URI
+// Ensure the connection string includes the database name
+const uri = process.env.MONGODB_URI.includes("/akipawpaw") 
+  ? process.env.MONGODB_URI 
+  : process.env.MONGODB_URI.replace(/\?/, "/akipawpaw?")
+
+// Log the connection string (without credentials)
+const sanitizedUri = uri.replace(/mongodb(\+srv)?:\/\/([^:]+):([^@]+)@/, 'mongodb$1://***:***@')
+console.log("Connecting to MongoDB:", sanitizedUri)
+
 const options = {
   ssl: true,
   tls: true,
-  tlsAllowInvalidCertificates: false,
-  tlsAllowInvalidHostnames: false,
+  tlsAllowInvalidCertificates: true,
+  tlsAllowInvalidHostnames: true,
   retryWrites: true,
-  writeConcern: new WriteConcern("majority")
+  writeConcern: new WriteConcern("majority"),
+  maxPoolSize: 10,
+  minPoolSize: 5,
+  maxIdleTimeMS: 60000,
+  connectTimeoutMS: 10000,
+  socketTimeoutMS: 45000
 }
 
 let client
