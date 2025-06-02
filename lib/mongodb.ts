@@ -1,11 +1,18 @@
-import { MongoClient } from "mongodb"
+import { MongoClient, WriteConcern } from "mongodb"
 
 if (!process.env.MONGODB_URI) {
   throw new Error('Invalid/Missing environment variable: "MONGODB_URI"')
 }
 
 const uri = process.env.MONGODB_URI
-const options = {}
+const options = {
+  ssl: true,
+  tls: true,
+  tlsAllowInvalidCertificates: false,
+  tlsAllowInvalidHostnames: false,
+  retryWrites: true,
+  writeConcern: new WriteConcern("majority")
+}
 
 let client
 let clientPromise: Promise<MongoClient>

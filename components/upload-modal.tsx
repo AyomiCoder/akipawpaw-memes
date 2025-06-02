@@ -33,8 +33,13 @@ export default function UploadModal({ children }: UploadModalProps) {
     "Dancing",
     "Celebration",
     "Shocked",
-    "Serious",
-    "Reaction",
+    "Happy",
+    "Pain",
+    "Surprised",
+    "Love",
+    "Sad",
+    "Excited",
+    "Sleepy"
   ]
 
   const handleSubmit = async (e: React.FormEvent) => {

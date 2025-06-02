@@ -3,7 +3,7 @@
 import type React from "react"
 import { X, Download, Link as LinkIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "@/hooks/use-toast"
 import type { Meme } from "@/lib/types"
 
 interface GifModalProps {
@@ -22,10 +22,11 @@ export default function GifModal({ gif, isOpen, onClose }: GifModalProps) {
   if (!isOpen) return null
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(`${window.location.origin}/?gif=${gif.id}`)
+    const url = `${window.location.origin}/?gif=${gif.id}`
+    navigator.clipboard.writeText(url)
     toast({
       title: "Link copied! 🔗",
-      description: "Meme link has been copied to clipboard",
+      description: "gif link has been copied to clipboard",
     })
   }
 
@@ -46,12 +47,14 @@ export default function GifModal({ gif, isOpen, onClose }: GifModalProps) {
     link.href = fileUrl
     link.download = `meme-${gif.id}.${fileUrl.split(".").pop()}`
     link.setAttribute("download", `meme-${gif.id}.${fileUrl.split(".").pop()}`)
+    link.setAttribute("target", "_blank")
+    link.setAttribute("rel", "noopener noreferrer")
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
     toast({
       title: "Downloading... 📥",
-      description: "Your meme is being downloaded",
+      description: "gif is being downloaded",
     })
   }
 

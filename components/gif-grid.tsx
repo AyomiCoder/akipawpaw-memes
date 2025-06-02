@@ -4,6 +4,8 @@ import { useState, useEffect } from "react"
 import GifCard from "@/components/gif-card"
 import GifModal from "@/components/gif-modal"
 import CategoryFilter from "@/components/category-filter"
+import { Button } from "@/components/ui/button"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import type { Meme } from "@/lib/types"
 
 interface GifGridProps {
@@ -16,6 +18,8 @@ export default function GifGrid({ searchQuery }: GifGridProps) {
   const [selectedCategory, setSelectedCategory] = useState("All")
   const [gifs, setGifs] = useState<Meme[]>([])
   const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(0)
+  const gifsPerPage = 12
 
   const fetchMemes = async () => {
     setLoading(true)
@@ -70,6 +74,19 @@ export default function GifGrid({ searchQuery }: GifGridProps) {
           gif.hashtags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())))
         )
 
+  const totalPages = Math.ceil(filteredGifs.length / gifsPerPage)
+  const startIndex = currentPage * gifsPerPage
+  const endIndex = startIndex + gifsPerPage
+  const currentGifs = filteredGifs.slice(startIndex, endIndex)
+
+  const handlePrevPage = () => {
+    setCurrentPage((prev) => (prev > 0 ? prev - 1 : prev))
+  }
+
+  const handleNextPage = () => {
+    setCurrentPage((prev) => (prev < totalPages - 1 ? prev + 1 : prev))
+  }
+
   return (
     <>
       <CategoryFilter selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} />
@@ -82,11 +99,41 @@ export default function GifGrid({ searchQuery }: GifGridProps) {
           <p className="text-gray-400 text-sm mt-2">Try selecting a different category or upload some memes!</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredGifs.map((gif) => (
-            <GifCard key={gif.id} gif={gif} onOpenModal={handleOpenModal} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {currentGifs.map((gif) => (
+              <GifCard key={gif.id} gif={gif} onOpenModal={handleOpenModal} />
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-4 mt-8">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handlePrevPage}
+                disabled={currentPage === 0}
+                className="text-gray-400 hover:text-white hover:bg-white/10"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+              
+              <span className="text-sm text-gray-400">
+                Page {currentPage + 1} of {totalPages}
+              </span>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages - 1}
+                className="text-gray-400 hover:text-white hover:bg-white/10"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </Button>
+            </div>
+          )}
+        </>
       )}
 
       {isModalOpen && selectedGif && <GifModal gif={selectedGif} isOpen={isModalOpen} onClose={handleCloseModal} />}

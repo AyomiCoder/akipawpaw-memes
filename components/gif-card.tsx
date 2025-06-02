@@ -4,7 +4,7 @@ import type React from "react"
 import { useState } from "react"
 import { Download, Link } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "@/hooks/use-toast"
 import type { Meme } from "@/lib/types"
 
 interface GifCardProps {
@@ -23,7 +23,8 @@ export default function GifCard({ gif, onOpenModal }: GifCardProps) {
 
   const handleCopyLink = (e?: React.MouseEvent) => {
     e?.stopPropagation()
-    navigator.clipboard.writeText(`${window.location.origin}/gif/${gif.id}`)
+    const url = `${window.location.origin}/?gif=${gif.id}`
+    navigator.clipboard.writeText(url)
     toast({
       title: "Link copied! 🔗",
       description: "Meme link has been copied to clipboard",
@@ -47,6 +48,8 @@ export default function GifCard({ gif, onOpenModal }: GifCardProps) {
     link.href = fileUrl
     link.download = `meme-${gif.id}.${fileUrl.split(".").pop()}`
     link.setAttribute("download", `meme-${gif.id}.${fileUrl.split(".").pop()}`)
+    link.setAttribute("target", "_blank")
+    link.setAttribute("rel", "noopener noreferrer")
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)

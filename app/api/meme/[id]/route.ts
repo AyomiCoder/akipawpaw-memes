@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server"
 import clientPromise from "@/lib/mongodb"
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
     const client = await clientPromise
     const db = client.db("akipawpaw")
@@ -15,10 +18,10 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
 
     return NextResponse.json({ meme })
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error fetching meme:", error)
     return NextResponse.json(
-      { error: error.message || "Failed to fetch meme" },
+      { error: "Failed to fetch meme" },
       { status: 500 }
     )
   }
