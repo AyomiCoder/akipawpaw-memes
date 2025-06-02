@@ -22,7 +22,7 @@ export default function GifModal({ gif, isOpen, onClose }: GifModalProps) {
   if (!isOpen) return null
 
   const handleCopyLink = () => {
-    const url = `${window.location.origin}/?gif=${gif.id}`
+    const url = `${window.location.origin}/?gif=${gif._id}`
     navigator.clipboard.writeText(url)
     toast({
       title: "Link copied! 🔗",
@@ -45,8 +45,8 @@ export default function GifModal({ gif, isOpen, onClose }: GifModalProps) {
   const handleDownload = () => {
     const link = document.createElement("a")
     link.href = fileUrl
-    link.download = `meme-${gif.id}.${fileUrl.split(".").pop()}`
-    link.setAttribute("download", `meme-${gif.id}.${fileUrl.split(".").pop()}`)
+    link.download = `meme-${gif._id}.${fileUrl.split(".").pop()}`
+    link.setAttribute("download", `meme-${gif._id}.${fileUrl.split(".").pop()}`)
     link.setAttribute("target", "_blank")
     link.setAttribute("rel", "noopener noreferrer")
     document.body.appendChild(link)

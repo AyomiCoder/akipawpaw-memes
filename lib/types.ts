@@ -1,4 +1,5 @@
 export interface Meme {
+  _id: string
   url: string
   id: string
   fileName: string

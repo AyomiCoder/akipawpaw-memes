@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import clientPromise from "@/lib/mongodb"
+import { ObjectId } from "mongodb"
 
 export async function GET(
   request: Request,
@@ -8,7 +9,7 @@ export async function GET(
   try {
     const client = await clientPromise
     const db = client.db("akipawpaw")
-    const meme = await db.collection("memes").findOne({ id: params.id })
+    const meme = await db.collection("memes").findOne({ _id: new ObjectId(params.id) })
 
     if (!meme) {
       return NextResponse.json(
