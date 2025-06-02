@@ -107,11 +107,11 @@ export default function UploadModal({ children }: UploadModalProps) {
       <div onClick={() => setIsOpen(true)}>{children}</div>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="bg-gradient-to-br from-slate-900 to-purple-900 border-purple-500/30 max-w-2xl">
-          <DialogHeader className="flex flex-row items-center justify-between border-b border-purple-500/30 pb-4">
+        <DialogContent className="bg-gradient-to-br from-slate-900 to-purple-900 border-purple-500/30 max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-lg w-[95%] sm:w-full">
+          <DialogHeader className="flex flex-row items-center justify-between border-b border-purple-500/30 pb-4 sticky top-0 bg-gradient-to-br from-slate-900 to-purple-900 z-10">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-6 w-6 text-yellow-400" />
-              <DialogTitle className="text-xl font-bold text-white">Upload Your Meme</DialogTitle>
+              <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-400" />
+              <DialogTitle className="text-lg sm:text-xl font-bold text-white">Upload Your Meme</DialogTitle>
             </div>
             <Button
               variant="ghost"
@@ -119,12 +119,12 @@ export default function UploadModal({ children }: UploadModalProps) {
               onClick={() => setIsOpen(false)}
               className="rounded-full text-gray-400 hover:text-white hover:bg-white/10"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4 sm:h-5 sm:w-5" />
               <span className="sr-only">Close</span>
             </Button>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 mt-4">
             {/* Uploader Name */}
             <div className="space-y-2 animate-fade-in">
               <Label htmlFor="name" className="text-sm font-semibold text-gray-300 flex items-center gap-2">
@@ -137,7 +137,7 @@ export default function UploadModal({ children }: UploadModalProps) {
                 placeholder="Enter your name"
                 value={uploaderName}
                 onChange={(e) => setUploaderName(e.target.value)}
-                className="bg-white/10 border-purple-500/30 text-white placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500/50 transition-all duration-300"
+                className="bg-white/10 border-purple-500/30 text-white placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500/50 transition-all duration-300 h-10 sm:h-11"
                 required
               />
             </div>
@@ -154,7 +154,7 @@ export default function UploadModal({ children }: UploadModalProps) {
                 placeholder="https://twitter.com/yourhandle"
                 value={socialLink}
                 onChange={(e) => setSocialLink(e.target.value)}
-                className="bg-white/10 border-purple-500/30 text-white placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500/50 transition-all duration-300"
+                className="bg-white/10 border-purple-500/30 text-white placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500/50 transition-all duration-300 h-10 sm:h-11"
               />
             </div>
 
@@ -165,7 +165,7 @@ export default function UploadModal({ children }: UploadModalProps) {
                 Category *
               </Label>
               <Select value={category} onValueChange={handleCategoryChange} required>
-                <SelectTrigger className="bg-white/10 border-purple-500/30 text-white focus:border-pink-500 focus:ring-pink-500/50">
+                <SelectTrigger className="bg-white/10 border-purple-500/30 text-white focus:border-pink-500 focus:ring-pink-500/50 h-10 sm:h-11">
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-purple-500/30">
@@ -190,7 +190,7 @@ export default function UploadModal({ children }: UploadModalProps) {
                 placeholder="funny, aki, pawpaw, reaction"
                 value={hashtags}
                 onChange={(e) => setHashtags(e.target.value)}
-                className="bg-white/10 border-purple-500/30 text-white placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500/50 transition-all duration-300"
+                className="bg-white/10 border-purple-500/30 text-white placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500/50 transition-all duration-300 h-10 sm:h-11"
               />
               <p className="text-xs text-gray-400">
                 The category hashtag will be automatically added. You can add more hashtags separated by commas.
@@ -203,7 +203,7 @@ export default function UploadModal({ children }: UploadModalProps) {
                 <Upload className="h-4 w-4 text-yellow-400" />
                 Upload Meme *
               </Label>
-              <div className="border-2 border-dashed border-purple-500/30 rounded-xl p-8 text-center hover:border-pink-500/50 transition-all duration-300 bg-white/5 hover:bg-white/10">
+              <div className="border-2 border-dashed border-purple-500/30 rounded-xl p-4 sm:p-8 text-center hover:border-pink-500/50 transition-all duration-300 bg-white/5 hover:bg-white/10">
                 <input
                   id="file"
                   type="file"
@@ -213,7 +213,7 @@ export default function UploadModal({ children }: UploadModalProps) {
                   required
                 />
                 <label htmlFor="file" className="cursor-pointer">
-                  <Upload className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                  <Upload className="h-8 w-8 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-2 sm:mb-3" />
                   <p className="text-sm font-medium text-gray-300">
                     {file ? file.name : "Click to upload your meme"}
                   </p>
@@ -226,7 +226,7 @@ export default function UploadModal({ children }: UploadModalProps) {
             <Button
               type="submit"
               disabled={isUploading}
-              className="w-full bg-gradient-to-r from-pink-500 to-violet-500 text-white hover:from-pink-600 hover:to-violet-600 font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed animate-fade-in"
+              className="w-full bg-gradient-to-r from-pink-500 to-violet-500 text-white hover:from-pink-600 hover:to-violet-600 font-bold py-3 sm:py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed animate-fade-in"
               style={{ animationDelay: "500ms" }}
             >
               {isUploading ? (
